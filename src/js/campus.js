@@ -280,16 +280,14 @@ app1.get("/mes", async (req, res) => {
             const result2 = await pool2.query(query2, queryParams);
             resultRows = [...resultRows, ...result2.rows];
         }
-
-        // Descomentar cuando esté disponible la base de datos Sur
-        // if (!req.query.region || req.query.region === 'Sur') {
-        //     const query3 = `SELECT 'Sur' AS region, TO_CHAR(fecha, 'MM-YYYY') AS anio_mes, SUM(total) AS venta_mensual 
-        //                    FROM ventas 
-        //                    ${whereClause}
-        //                    GROUP BY TO_CHAR(fecha, 'MM-YYYY')`;
-        //     const result3 = await pool3.query(query3, queryParams);
-        //     resultRows = [...resultRows, ...result3.rows];
-        // }
+        if (!req.query.region || req.query.region === 'Sur') {
+            const query3 = `SELECT 'Sur' AS region, TO_CHAR(fecha, 'MM-YYYY') AS anio_mes, SUM(total) AS venta_mensual 
+                            FROM ventas 
+                            ${whereClause}
+                            GROUP BY TO_CHAR(fecha, 'MM-YYYY')`;
+            const result3 = await pool3.query(query3, queryParams);
+            resultRows = [...resultRows, ...result3.rows];
+        }
 
         // Mostrar resultados
         html += `
