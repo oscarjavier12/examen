@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Registro de Ventas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .card {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: none;
+            border-radius: 15px;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px 15px 0 0 !important;
+            padding: 25px;
+        }
+
+        .card-header h2 {
+            color: white;
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-control,
+        .form-select {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 8px;
+            width: 100%;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .form-group-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-group-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>
+                            <i class="bi bi-clipboard-check"></i>
+                            Registro de Ventas
+                        </h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <form action="/registrar" method="post">
+                            <!-- Fecha y Cliente -->
+                            <div class="form-group-row mb-4">
+                                <div>
+                                    <label class="form-label" for="fecha">
+                                        <i class="bi bi-calendar"></i> Fecha
+                                    </label>
+                                    <input type="date" class="form-control" id="fecha" name="fecha" required>
+                                </div>
+                                <div>
+                                    <label class="form-label" for="cliente">
+                                        <i class="bi bi-person"></i> Cliente
+                                    </label>
+                                    <input type="text" class="form-control" id="cliente" name="cliente"
+                                        placeholder="Nombre del cliente" required>
+                                </div>
+                            </div>
+
+                            <!-- Producto y Región -->
+                            <div class="form-group-row mb-4">
+                                <div>
+                                    <label class="form-label" for="producto">
+                                        <i class="bi bi-geo-alt"></i> Producto
+                                    </label>
+                                    <select class="form-select" id="region" name="producto" required>
+                                        <option value="Lapicero">Lapicero</option>
+                                        <option value="Pantalla 4K">Pantalla 4K</option>
+                                        <option value="Telefono XYZ">Telefono XYZ</option>
+                                        <option value="Bocina Bluetooth">Bocina Bluetooth</option>
+                                        <option value="Accesorio USB">Accesorio USB</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label" for="region">
+                                        <i class="bi bi-geo-alt"></i> Región
+                                    </label>
+                                    <select class="form-select" id="region" name="region" required>
+                                        <option value="">Selecciona una región</option>
+                                        <option value="Norte">Norte</option>
+                                        <option value="Centro">Centro</option>
+                                        <option value="Sur">Sur</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Cantidad y Total -->
+                            <div class="form-group-row mb-4">
+                                <div>
+                                    <label class="form-label" for="cantidad">
+                                        <i class="bi bi-123"></i> Cantidad
+                                    </label>
+                                    <input type="number" class="form-control" id="cantidad" name="cantidad"
+                                        placeholder="0" min="1" required>
+                                </div>
+                                <div>
+                                    <label class="form-label" for="total">
+                                        <i class="bi bi-currency-dollar"></i> Total
+                                    </label>
+                                    <input type="number" class="form-control" id="total" name="total" placeholder="0.00"
+                                        step="0.01" min="0" required>
+                                </div>
+                            </div>
+
+                            <!-- Botón -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-submit text-white">
+                                    <i class="bi bi-send"></i> Enviar Registro
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
