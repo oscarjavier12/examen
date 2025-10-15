@@ -177,65 +177,164 @@ app1.get("/total", async (req, res) => {
 )
 app1.get("/mes", async (req, res) => {
     try {
-        const result1 = await pool1.query("SELECT region, TO_CHAR(fecha, 'MM-YYYY') AS anio_mes, SUM(total) AS venta_mensual FROM ventas GROUP BY TO_CHAR(fecha, 'MM-YYYY'), region");
-        const result2 = await pool2.query("SELECT region, TO_CHAR(fecha, 'MM-YYYY') AS anio_mes, SUM(total) AS venta_mensual FROM ventas GROUP BY TO_CHAR(fecha, 'MM-YYYY'), region");
-        const result3 = await pool3.query("SELECT region, TO_CHAR(fecha, 'MM-YYYY') AS anio_mes, SUM(total) AS venta_mensual FROM ventas GROUP BY TO_CHAR(fecha, 'MM-YYYY'), region");
-        const result = { rows: [...result1.rows, ...result2.rows, ...result3.rows] };
-
         let html = `
-    <head>
+        <!DOCTYPE html> 
+        <html lang="en">
+        <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Listado de Estudiantes</title>
+        <title>Ventas por Mes</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
         </head>
         <body class="container mt-5">
         <div>
-        <div class="btn-group" role="group" aria-label="Basic example">
-            <a href="/ventas" type="submit" class="btn btn-primary" >Mostrar</a>
-            <a href="/total" type="submit" class="btn btn-primary" >Total</a>
-            <a href="/productos" type="submit" class="btn btn-primary">Demanda</a>
-            <a href="/mes" type="submit" class="btn btn-primary">VentaMes</a>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <a href="/ventas" type="submit" class="btn btn-primary">Mostrar</a>
+                <a href="/total" type="submit" class="btn btn-primary">Total</a>
+                <a href="/productos" type="submit" class="btn btn-primary">Demanda</a>
+                <a href="/mes" type="submit" class="btn btn-primary">VentaMes</a>
+            </div>
         </div>
 
-        </div>
-        <h2 class="mb-4">Listado de regiones</h2>
-        <!-------Tabla con los registrpos de la consulta -------->
+        <h2 class="mb-4">Ventas por Mes y Región</h2>
+
+        <!-- Formulario de filtros -->
+        <form method="GET" action="/mes" class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label for="region" class="form-label">Región:</label>
+                <select name="region" id="region" class="form-select">
+                    <option value="">Todas las regiones</option>
+                    <option value="Norte" ${req.query.region === 'Norte' ? 'selected' : ''}>Norte</option>
+                    <option value="Centro" ${req.query.region === 'Centro' ? 'selected' : ''}>Centro</option>
+                    <option value="Sur" ${req.query.region === 'Sur' ? 'selected' : ''}>Sur</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="mes" class="form-label">Mes:</label>
+                <select name="mes" id="mes" class="form-select">
+                    <option value="">Todos los meses</option>
+                    <option value="01" ${req.query.mes === '01' ? 'selected' : ''}>Enero</option>
+                    <option value="02" ${req.query.mes === '02' ? 'selected' : ''}>Febrero</option>
+                    <option value="03" ${req.query.mes === '03' ? 'selected' : ''}>Marzo</option>
+                    <option value="04" ${req.query.mes === '04' ? 'selected' : ''}>Abril</option>
+                    <option value="05" ${req.query.mes === '05' ? 'selected' : ''}>Mayo</option>
+                    <option value="06" ${req.query.mes === '06' ? 'selected' : ''}>Junio</option>
+                    <option value="07" ${req.query.mes === '07' ? 'selected' : ''}>Julio</option>
+                    <option value="08" ${req.query.mes === '08' ? 'selected' : ''}>Agosto</option>
+                    <option value="09" ${req.query.mes === '09' ? 'selected' : ''}>Septiembre</option>
+                    <option value="10" ${req.query.mes === '10' ? 'selected' : ''}>Octubre</option>
+                    <option value="11" ${req.query.mes === '11' ? 'selected' : ''}>Noviembre</option>
+                    <option value="12" ${req.query.mes === '12' ? 'selected' : ''}>Diciembre</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="anio" class="form-label">Año:</label>
+                <input type="text" name="anio" id="anio" class="form-control" placeholder="2024" value="${req.query.anio || ''}">
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-success">Filtrar</button>
+                <a href="/mes" class="btn btn-secondary">Limpiar filtros</a>
+            </div>
+        </form>
+        `;
+
+        // Construir la consulta SQL con filtros
+        let whereConditions = [];
+        let queryParams = [];
+        let paramCounter = 1;
+
+        if (req.query.mes) {
+            whereConditions.push(`EXTRACT(MONTH FROM fecha) = $${paramCounter}`);
+            queryParams.push(parseInt(req.query.mes));
+            paramCounter++;
+        }
+
+        if (req.query.anio) {
+            whereConditions.push(`EXTRACT(YEAR FROM fecha) = $${paramCounter}`);
+            queryParams.push(parseInt(req.query.anio));
+            paramCounter++;
+        }
+
+        let whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+
+        // Consultas a cada base de datos
+        let resultRows = [];
+
+        // Solo consultar la región seleccionada o todas si no hay filtro
+        if (!req.query.region || req.query.region === 'Norte') {
+            const query1 = `SELECT 'Norte' AS region, TO_CHAR(fecha, 'MM-YYYY') AS anio_mes, SUM(total) AS venta_mensual 
+                           FROM ventas 
+                           ${whereClause}
+                           GROUP BY TO_CHAR(fecha, 'MM-YYYY')`;
+            const result1 = await pool1.query(query1, queryParams);
+            resultRows = [...resultRows, ...result1.rows];
+        }
+
+        if (!req.query.region || req.query.region === 'Centro') {
+            const query2 = `SELECT 'Centro' AS region, TO_CHAR(fecha, 'MM-YYYY') AS anio_mes, SUM(total) AS venta_mensual 
+                           FROM ventas 
+                           ${whereClause}
+                           GROUP BY TO_CHAR(fecha, 'MM-YYYY')`;
+            const result2 = await pool2.query(query2, queryParams);
+            resultRows = [...resultRows, ...result2.rows];
+        }
+
+        // Descomentar cuando esté disponible la base de datos Sur
+        // if (!req.query.region || req.query.region === 'Sur') {
+        //     const query3 = `SELECT 'Sur' AS region, TO_CHAR(fecha, 'MM-YYYY') AS anio_mes, SUM(total) AS venta_mensual 
+        //                    FROM ventas 
+        //                    ${whereClause}
+        //                    GROUP BY TO_CHAR(fecha, 'MM-YYYY')`;
+        //     const result3 = await pool3.query(query3, queryParams);
+        //     resultRows = [...resultRows, ...result3.rows];
+        // }
+
+        // Mostrar resultados
+        html += `
         <table class="table table-striped table-hover">
             <thead class="table-dark">
                 <tr>
-                    <th>Region</th>
+                    <th>Región</th>
                     <th>Fecha</th>
                     <th>Ventas por mes</th>
-
                 </tr>
             </thead> 
             <tbody>
         `;
-        result.rows.forEach(rg => {
+
+        if (resultRows.length > 0) {
+            resultRows.forEach(rg => {
+                html += `
+                <tr>
+                    <td>${rg.region}</td>
+                    <td>${rg.anio_mes}</td>
+                    <td>$${parseFloat(rg.venta_mensual).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                </tr>
+                `;
+            });
+        } else {
             html += `
             <tr>
-                <td>${rg.region}</td>
-                <td>${rg.anio_mes}</td>
-                <td>${rg.venta_mensual.toLocaleString('es-MX')}</td>
-                
+                <td colspan="3" class="text-center">No se encontraron resultados para los filtros seleccionados</td>
             </tr>
             `;
-        });
+        }
+
         html += `           
             </tbody>
             </table>
             </body>
             </html>`;
+
         res.send(html);
 
     } catch (error) {
-
+        console.error('Error en /mes:', error);
+        res.status(500).send('Error al obtener las ventas por mes');
     }
-}
-)
+});
 
 app1.get("/productos", async (req, res) => {
     try {
