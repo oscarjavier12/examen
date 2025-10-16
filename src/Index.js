@@ -6,7 +6,7 @@ const app = express();
 const PORT = 3000;
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
-const ip = '10.1.105.48';
+const ip = '10.1.105.82';
 const contraseña = "jeonjungkook";
 
 // Middleware para parsear el cuerpo de las solicitudes

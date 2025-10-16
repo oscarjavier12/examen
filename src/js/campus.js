@@ -4,7 +4,7 @@ const app1 = express();
 const PORT = 3000;
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
-const ip = '10.1.105.48';
+const ip = '10.1.105.82';
 const contraseña = "jeonjungkook";
 //
 
@@ -52,12 +52,13 @@ const tablas = (bd) => {
         </head>
         <body class="container mt-5">
         <div>
-        <div class="btn-group" role="group" aria-label="Basic example">
-            <a href="/ventas" type="submit" class="btn btn-primary" >Mostrar</a>
-            <a href="/total" type="submit" class="btn btn-primary" >Total</a>
-            <a href="/productos" type="submit" class="btn btn-primary">Demanda</a>
-            <a href="/mes" type="submit" class="btn btn-primary">VentaMes</a>
-        </div>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                    <a href="/ventas" type="submit" class="btn btn-primary">Mostrar</a>
+                    <a href="/total" type="submit" class="btn btn-primary">Total</a>
+                    <a href="/productos" type="submit" class="btn btn-primary">Demanda</a>
+                    <a href="/mes" type="submit" class="btn btn-primary">VentaMes</a>
+                    <a href="/cliente" type="submit" class="btn btn-primary">Buscar Cliente</a>
+                </div>
 
         </div>
         <h2 class="mb-4">Listado de regiones</h2>
@@ -136,12 +137,13 @@ app1.get("/total", async (req, res) => {
         </head>
         <body class="container mt-5">
         <div>
-        <div class="btn-group" role="group" aria-label="Basic example">
-            <a href="/ventas" type="submit" class="btn btn-primary" >Mostrar</a>
-            <a href="/total" type="submit" class="btn btn-primary" >Total</a>
-            <a href="/productos" type="submit" class="btn btn-primary">Demanda</a>
-            <a href="/mes" type="submit" class="btn btn-primary">VentaMes</a>
-        </div>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                    <a href="/ventas" type="submit" class="btn btn-primary">Mostrar</a>
+                    <a href="/total" type="submit" class="btn btn-primary">Total</a>
+                    <a href="/productos" type="submit" class="btn btn-primary">Demanda</a>
+                    <a href="/mes" type="submit" class="btn btn-primary">VentaMes</a>
+                    <a href="/cliente" type="submit" class="btn btn-primary">Buscar Cliente</a>
+                </div>
 
         </div>
         <h2 class="mb-4">Listado de regiones</h2>
@@ -191,11 +193,13 @@ app1.get("/mes", async (req, res) => {
         <body class="container mt-5">
         <div>
             <div class="btn-group" role="group" aria-label="Basic example">
-                <a href="/ventas" type="submit" class="btn btn-primary">Mostrar</a>
-                <a href="/total" type="submit" class="btn btn-primary">Total</a>
-                <a href="/productos" type="submit" class="btn btn-primary">Demanda</a>
-                <a href="/mes" type="submit" class="btn btn-primary">VentaMes</a>
-            </div>
+                    <a href="/ventas" type="submit" class="btn btn-primary">Mostrar</a>
+                    <a href="/total" type="submit" class="btn btn-primary">Total</a>
+                    <a href="/productos" type="submit" class="btn btn-primary">Demanda</a>
+                    <a href="/mes" type="submit" class="btn btn-primary">VentaMes</a>
+                    <a href="/cliente" type="submit" class="btn btn-primary">Buscar Cliente</a>
+                </div>
+            
         </div>
 
         <h2 class="mb-4">Ventas por Mes y Región</h2>
@@ -370,12 +374,13 @@ app1.get("/productos", async (req, res) => {
         </head>
         <body class="container mt-5">
         <div>
-        <div class="btn-group" role="group" aria-label="Basic example">
-            <a href="/ventas" type="submit" class="btn btn-primary" >Mostrar</a>
-            <a href="/total" type="submit" class="btn btn-primary" >Total</a>
-            <a href="/productos" type="submit" class="btn btn-primary">Demanda</a>
-            <a href="/mes" type="submit" class="btn btn-primary">VentaMes</a>
-        </div>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <a href="/ventas" type="submit" class="btn btn-primary">Mostrar</a>
+                <a href="/total" type="submit" class="btn btn-primary">Total</a>
+                <a href="/productos" type="submit" class="btn btn-primary">Demanda</a>
+                <a href="/mes" type="submit" class="btn btn-primary">VentaMes</a>
+                <a href="/cliente" type="submit" class="btn btn-primary">Buscar Cliente</a>
+            </div>
         </div>
         <h2 class="mb-4">Listado de productos</h2>
         <!-------Tabla con los registrpos de la consulta -------->
@@ -426,7 +431,7 @@ app1.get("/cliente", async (req, res) => {
                     <a href="/total" type="submit" class="btn btn-primary">Total</a>
                     <a href="/productos" type="submit" class="btn btn-primary">Demanda</a>
                     <a href="/mes" type="submit" class="btn btn-primary">VentaMes</a>
-                    <a href="/cliente" type="submit" class="btn btn-success">Buscar Cliente</a>
+                    <a href="/cliente" type="submit" class="btn btn-primary">Buscar Cliente</a>
                 </div>
             </div>
 
