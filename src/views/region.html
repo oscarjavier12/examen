@@ -12,8 +12,6 @@
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
             padding: 20px 0;
         }
 
@@ -77,10 +75,44 @@
             transform: translateY(0);
         }
 
+        .btn-add {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            padding: 12px 20px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+            color: white;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+            color: white;
+        }
+
         .form-group-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .table thead {
+            position: sticky;
+            top: 0;
+            background: #667eea;
+            color: white;
+            z-index: 10;
+        }
+
+        .btn-delete {
+            padding: 5px 10px;
+            font-size: 0.85rem;
         }
 
         @media (max-width: 768px) {
@@ -92,9 +124,10 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="container-fluid">
         <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-8">
+            <!-- Formulario -->
+            <div class="col-lg-5 col-md-6 mb-4">
                 <div class="card">
                     <div class="card-header">
                         <h2>
@@ -103,7 +136,7 @@
                         </h2>
                     </div>
                     <div class="card-body p-4">
-                        <form action="/registrar" method="post">
+                        <form id="formVentas" action="/registrar" method="post">
                             <!-- Fecha y Cliente -->
                             <div class="form-group-row mb-4">
                                 <div>
@@ -125,22 +158,16 @@
                             <div class="form-group-row mb-4">
                                 <div>
                                     <label class="form-label" for="producto">
-                                        <i class="bi bi-geo-alt"></i> Producto
+                                        <i class="bi bi-box"></i> Producto
                                     </label>
-                                    <select class="form-select" id="region" name="producto" required>
-                                        <option value="Lapicero">Lapicero</option>
-                                        <option value="Pantalla 4K">Pantalla 4K</option>
-                                        <option value="Telefono XYZ">Telefono XYZ</option>
-                                        <option value="Bocina Bluetooth">Bocina Bluetooth</option>
-                                        <option value="Accesorio USB">Accesorio USB</option>
-                                    </select>
+                                    <input type="text" class="form-control" id="producto" name="producto"
+                                        placeholder="Nombre del producto">
                                 </div>
                                 <div>
                                     <label class="form-label" for="region">
                                         <i class="bi bi-geo-alt"></i> Región
                                     </label>
-                                    <select class="form-select" id="region" name="region" required>
-                                        <option value="">Selecciona una región</option>
+                                    <select class="form-select" id="region" name="region">
                                         <option value="Norte">Norte</option>
                                         <option value="Centro">Centro</option>
                                         <option value="Sur">Sur</option>
@@ -148,27 +175,36 @@
                                 </div>
                             </div>
 
-                            <!-- Cantidad y Total -->
+                            <!-- Cantidad y Total con botón agregar -->
                             <div class="form-group-row mb-4">
                                 <div>
                                     <label class="form-label" for="cantidad">
                                         <i class="bi bi-123"></i> Cantidad
                                     </label>
                                     <input type="number" class="form-control" id="cantidad" name="cantidad"
-                                        placeholder="0" min="1" required>
+                                        placeholder="0" min="1">
                                 </div>
                                 <div>
                                     <label class="form-label" for="total">
                                         <i class="bi bi-currency-dollar"></i> Total
                                     </label>
-                                    <input type="number" class="form-control" id="total" name="total" placeholder="0.00"
-                                        step="0.01" min="0" required>
+                                    <div class="d-flex gap-2">
+                                        <input type="number" class="form-control" id="total" name="total"
+                                            placeholder="0.00" step="0.01" min="0">
+                                        <button type="button" class="btn btn-add" onclick="agregarProducto()"
+                                            id="btnAgregar">
+                                            <i class="bi bi-plus-circle"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
+                            <!-- Campos ocultos para el envío final -->
+                            <input type="hidden" id="productosJson" name="productosJson">
+
                             <!-- Botón -->
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-submit text-white">
+                            <div class="d-grid gap-2" id="btnEnviarContainer" style="display: none;">
+                                <button type="submit" class="btn btn-submit text-white" id="btnEnviar">
                                     <i class="bi bi-send"></i> Enviar Registro
                                 </button>
                             </div>
@@ -176,8 +212,162 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Tabla de productos -->
+            <div class="col-lg-5 col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>
+                            <i class="bi bi-table"></i>
+                            Productos Agregados
+                        </h2>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-container">
+                            <table class="table table-striped table-hover mb-0" id="tablaProductos">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                        <th>Total</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaProductos">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            No hay productos agregados
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        let productos = [];
+        let camposBloqueados = false;
+
+        function agregarProducto() {
+            const producto = document.getElementById('producto').value;
+            const cantidad = document.getElementById('cantidad').value;
+            const total = document.getElementById('total').value;
+
+            // Validar que todos los campos estén llenos
+            if (!producto || !cantidad || !total) {
+                alert('Por favor completa todos los campos del producto');
+                return;
+            }
+
+            // Bloquear campos después del primer producto agregado
+            if (!camposBloqueados) {
+                document.getElementById('fecha').readOnly = true;
+                document.getElementById('cliente').readOnly = true;
+                const regionSelect = document.getElementById('region');
+                regionSelect.style.pointerEvents = 'none';
+                regionSelect.style.backgroundColor = '#e9ecef';
+                regionSelect.style.cursor = 'not-allowed';
+                camposBloqueados = true;
+                camposBloqueados = true;
+            }
+
+            // Agregar producto al array
+            productos.push({
+                producto: producto,
+                cantidad: parseInt(cantidad),
+                total: parseFloat(total)
+            });
+
+            // Actualizar tabla
+            actualizarTabla();
+
+            // Limpiar campos de producto
+            document.getElementById('producto').value = '';
+            document.getElementById('cantidad').value = '';
+            document.getElementById('total').value = '';
+
+            // Focus en producto para agregar más
+            document.getElementById('producto').focus();
+        }
+
+        function actualizarTabla() {
+            const tbody = document.getElementById('tablaProductos');
+            const btnEnviarContainer = document.getElementById('btnEnviarContainer');
+
+            if (productos.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            No hay productos agregados
+                        </td>
+                    </tr>
+                `;
+                // Ocultar botón de enviar
+                btnEnviarContainer.style.display = 'none';
+                return;
+            }
+
+            // Mostrar botón de enviar
+            btnEnviarContainer.style.display = 'block';
+
+            tbody.innerHTML = '';
+            productos.forEach((prod, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${prod.producto}</td>
+                        <td>${prod.cantidad}</td>
+                        <td>${prod.total.toFixed(2)}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm btn-delete" onclick="eliminarProducto(${index})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function eliminarProducto(index) {
+            productos.splice(index, 1);
+            actualizarTabla();
+
+            // Si no quedan productos, desbloquear campos
+            if (productos.length === 0) {
+                document.getElementById('fecha').readOnly = false;
+                document.getElementById('cliente').readOnly = false;
+                document.getElementById('region').disabled = false;
+                camposBloqueados = false;
+            }
+        }
+
+        // Manejar envío del formulario
+        document.getElementById('formVentas').addEventListener('submit', function (e) {
+            if (productos.length === 0) {
+                e.preventDefault();
+                alert('Debes agregar al menos un producto');
+                return;
+            }
+
+            // Aquí puedes procesar los productos
+            // Por ahora los mostramos en consola
+            console.log('Productos a enviar:', productos);
+
+            // Puedes crear inputs ocultos con los datos o enviarlos por AJAX
+            document.getElementById('productosJson').value = JSON.stringify(productos);
+        });
+
+        // Permitir agregar con Enter en el campo total
+        document.getElementById('total').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                agregarProducto();
+            }
+        });
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
