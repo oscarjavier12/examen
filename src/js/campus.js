@@ -86,7 +86,7 @@ const tablas = (bd) => {
                 <td>${rg.cliente}</td>
                 <td>${rg.producto}</td>
                 <td>${rg.cantidad}</td>
-                <td>${rg.total}</td>
+                <td>$${parseFloat(rg.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
                 <td>${rg.region}</td>
                 
             </tr>
@@ -161,7 +161,7 @@ app1.get("/total", async (req, res) => {
             html += `
             <tr>
                 <td>${rg.region}</td>
-                <td>${rg.total_venta.toLocaleString('es-MX')}</td>
+                <td>$${parseFloat(rg.total_venta).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
                 
             </tr>
             `;
