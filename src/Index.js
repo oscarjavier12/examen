@@ -46,25 +46,42 @@ app.get("/Formulario", (req, res) => {
 });
 
 app.post("/registrar", async (req, res) => {
-    const { fecha, cliente, producto, cantidad, total, region } = req.body;
-
+    const { fecha, cliente, region, productosJson } = req.body;
+    console.log(req.body)
     try {
+        // Parsear el JSON de productos
+        const productos = JSON.parse(productosJson);
+
+        // Validar que haya productos
+        if (!productos || productos.length === 0) {
+            return res.send('Error: No hay productos para registrar');
+        }
+
+        // Seleccionar la base de datos según la región
         const pool = bd(region);
-        probarConexion(pool);
-        await pool.query(
-            "INSERT INTO ventas (fecha,cliente,producto,cantidad,total,region) VALUES ($1, $2, $3, $4,$5, $6)",
-            [fecha, cliente, producto, cantidad, total, region]);
+        console.log(pool)
+        await probarConexion(pool);
+
+        // Insertar cada producto en la base de datos
+        for (const producto of productos) {
+            await pool.query(
+                "INSERT INTO ventas (fecha, cliente, producto, cantidad, total, region) VALUES ($1, $2, $3, $4, $5, $6)",
+                [fecha, cliente, producto.producto, producto.cantidad, producto.total, region]
+            );
+        }
+
+        // Redirigir a la página de ventas después de registrar
         return res.redirect(`/ventas`);
 
     } catch (error) {
-        console.error('Error al registrar el estudiante:', error);
-        res.send('Error al registrar el estudiante');
+        console.error('Error al registrar las ventas:', error);
+        res.send('Error al registrar las ventas: ' + error.message);
     }
 });
 
 
-const bd = (campus) => {
-    switch (campus) {
+const bd = (region) => {
+    switch (region) {
         case 'Norte':
             return pool1;
         case 'Centro':
